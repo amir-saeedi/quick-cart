@@ -8,10 +8,12 @@ if (!cached) {
 
 async function connectDB() {
     if (cached.conn) {
+        console.log("📦 Using existing MongoDB connection");
         return cached.conn
     }
 
     if (!cached.promise) {
+        console.log("🔌 Creating new MongoDB connection...");
         const opts = {
             bufferCommands: false
         }
@@ -19,8 +21,15 @@ async function connectDB() {
             return mongoose
         })
     }
-    cached.conn = await cached.promise
-    return cached
+    try {
+        cached.conn = await cached.promise;
+        console.log("✅ MongoDB connected:", cached.conn.connection.name);
+        return cached.conn;
+    } catch (e) {
+        cached.promise = null; // reset if failed
+        console.error("❌ MongoDB connection failed:", e.message);
+        throw e;
+    }
 }
 export default connectDB
 
