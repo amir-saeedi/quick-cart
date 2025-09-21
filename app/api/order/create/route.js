@@ -1,4 +1,4 @@
-import connectDB from "@/config/db";
+import { inngest } from "@/config/inngest";
 import Product from "@/models/Products";
 import User from "@/models/Users";
 import { getAuth } from "@clerk/nextjs/server";
@@ -14,7 +14,7 @@ export async function POST(request) {
         }
         const amount = await items.reduce(async (acc, item) => {
             const product = await Product.findById(item.product);
-            return acc + product.offerPrice * item.quantity
+            return await acc + product.offerPrice * item.quantity
         }, 0)
 
         await inngest.send({
@@ -24,7 +24,7 @@ export async function POST(request) {
                 address,
                 items,
                 amount: amount + Math.floor(amount * 0.02),
-                data: Data.now()
+                data: Date.now()
             }
         })
 
